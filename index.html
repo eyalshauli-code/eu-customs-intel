@@ -203,14 +203,42 @@ function setSyncErr() { var d=document.getElementById('syncDot'); if(d){d.classN
 // ── STATE — now backed by Firestore ──────────────────────────────────────────
 var ST = {};          // local cache — mirrored from Firestore
 var unsubListeners = {}; // per-country Firestore listeners
+var useLocalStorage = false; // fallback when Firebase unavailable
+
+// ── LOCALSTORAGE HELPERS ──────────────────────────────────────────────────────
+function lsKey(id){ return 'eu_customs_country_'+id; }
+function lsSave(id){
+  try{ localStorage.setItem(lsKey(id), JSON.stringify(ST[id]||{})); }catch(e){}
+}
+function lsLoad(id){
+  try{
+    var raw=localStorage.getItem(lsKey(id));
+    if(raw){ ST[id]=JSON.parse(raw); return true; }
+  }catch(e){}
+  return false;
+}
+function lsLoadAll(){
+  try{
+    Object.keys(localStorage).forEach(function(k){
+      if(k.startsWith('eu_customs_country_')){
+        var id=parseInt(k.replace('eu_customs_country_',''));
+        if(!isNaN(id)){
+          try{ ST[id]=JSON.parse(localStorage.getItem(k)); }catch(e){}
+        }
+      }
+    });
+  }catch(e){}
+}
 
 // Load a country doc from Firestore and keep it live
 function listenCountry(id) {
   if (unsubListeners[id]) return; // already listening
+  if(useLocalStorage){ lsLoad(id); return; }
   var ref = db.collection('countries').doc(String(id));
   var unsub = ref.onSnapshot(function(snap) {
     if (snap.exists) {
       ST[id] = snap.data();
+      lsSave(id); // mirror to localStorage
     }
     // re-render if we're currently viewing this country
     if (detail && detail.id === id) renderSlide();
@@ -218,15 +246,25 @@ function listenCountry(id) {
   unsubListeners[id] = unsub;
 }
 
-// Save a country state to Firestore
+// Save a country state to Firestore + localStorage
 var saveTimers = {};
+function sanitizeForFirestore(obj){
+  return JSON.parse(JSON.stringify(obj, function(k,v){
+    return v===undefined ? null : v;
+  }));
+}
+
 function save(id) {
   if (!id) return;
+  lsSave(id); // always save to localStorage immediately
+  if(useLocalStorage){ setSynced(); return; }
   setSyncing();
   clearTimeout(saveTimers[id]);
   saveTimers[id] = setTimeout(function() {
-    db.collection('countries').doc(String(id)).set(ST[id] || {})
-      .then(setSynced).catch(function(e) { console.error(e); setSyncErr(); });
+    var data = sanitizeForFirestore(ST[id] || {});
+    db.collection('countries').doc(String(id)).set(data)
+      .then(function(){ setSynced(); lsSave(id); })
+      .catch(function(e) { console.error('Firestore save error:', e); setSyncErr(); lsSave(id); });
   }, 600); // debounce 600ms
 }
 
@@ -2815,20 +2853,31 @@ function showApp(){
 
 // Timeout: if Firebase doesn't respond in 5 seconds, load anyway in offline mode
 var startupTimer=setTimeout(function(){
-  console.warn('Firebase timeout — loading in offline mode');
+  console.warn('Firebase timeout — switching to localStorage mode');
+  useLocalStorage=true;
+  lsLoadAll(); // load all saved data from localStorage
   setSyncErr();
+  // Update sync label to show offline mode
+  var l=document.getElementById('syncLbl');
+  if(l)l.textContent='Local only';
   showApp();
 }, 5000);
 
 db.collection('settings').doc('auth').get()
   .then(function(){
     clearTimeout(startupTimer);
+    useLocalStorage=false;
+    lsLoadAll(); // pre-load localStorage data as cache
     showApp();
   })
   .catch(function(e){
     clearTimeout(startupTimer);
-    console.warn('Firestore unreachable:', e.message);
+    console.warn('Firestore unreachable — switching to localStorage mode:', e.message);
+    useLocalStorage=true;
+    lsLoadAll();
     setSyncErr();
+    var l=document.getElementById('syncLbl');
+    if(l)l.textContent='Local only';
     showApp();
   });
 </script>

@@ -632,8 +632,8 @@ function renderDetail(c){
   var pipeColor=c.progressStatus==='active'?'var(--green)':c.progressStatus==='fallen'?'var(--red)':c.progressStatus==='pending'?'var(--yellow)':'var(--text2)';
 
   // tab bar
-  var coreTabs=['overview','relations','procurement','pipeline','notes','history','documents','news','trade','capture','report'];
-  var coreLabels={overview:'Overview',relations:'Relations & Vendors',procurement:'Procurement',pipeline:'Pipeline',notes:'Notes'+(notes.length?' ('+notes.length+')':''),history:'History'+(hist.length?' ('+hist.length+')':''),documents:'Documents',news:'📰 News & Media',trade:'🌐 Trade Data',capture:'👥 Capture Plan',report:'📄 Report'};
+  var coreTabs=['overview','relations','procurement','pipeline','log','history','documents','news','trade','capture','report'];
+  var coreLabels={overview:'Overview',relations:'Relations & Vendors',procurement:'Procurement',pipeline:'Pipeline',log:'📋 Log'+(notes.length?' ('+notes.length+')':''),history:'History'+(hist.length?' ('+hist.length+')':''),documents:'Documents',news:'📰 News & Media',trade:'🌐 Trade Data',capture:'👥 Capture Plan',report:'📄 Report'};
   var tb='<div class="tab-bar">';
   coreTabs.forEach(function(id){tb+='<button class="tab'+(t===id?' active':'')+'" onclick="setDTab(\''+id+'\')">'+coreLabels[id]+'</button>';});
   ctabs.forEach(function(ct){
@@ -749,17 +749,39 @@ function renderDetail(c){
       +'<button class="sbtn" onclick="var el=document.getElementById(\'pipeIn'+c.id+'\');if(el&&el.value.trim()){addPipeUpdate('+c.id+',el.value.trim());renderSlide();}">+ Add update</button>'
       +'</div>';
 
-  }else if(t==='notes'){
+  }else if(t==='log'){
     var nItems='';
-    notes.forEach(function(n,i){
-      nItems+='<div class="note-entry"><div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px"><div class="note-text">'+n.text.replace(/\n/g,'<br>')+'</div><button class="dbtn" onclick="delNote('+c.id+','+i+');renderSlide()">✕</button></div>'
-        +'<div class="note-date">'+n.date+(n.user?' &nbsp;·&nbsp; <span style="color:var(--accent2)">'+n.user+'</span>':'')+'</div></div>';
+    notes.slice().reverse().forEach(function(n,ri){
+      var i=notes.length-1-ri;
+      var isEdit=s.logEditIdx===i;
+      if(isEdit){
+        nItems+='<div class="note-entry" style="background:var(--bg3);border-left:3px solid var(--accent2);padding:12px;border-radius:0 8px 8px 0;margin-bottom:10px">'
+          +'<textarea class="ef" id="logEdit'+c.id+'_'+i+'" style="min-height:80px;margin-bottom:8px">'+n.text+'</textarea>'
+          +'<div style="display:flex;gap:8px;align-items:center">'
+          +'<button class="sbtn" style="font-size:12px;padding:4px 12px" onclick="var ta=document.getElementById(\'logEdit'+c.id+'_'+i+'\');if(ta&&ta.value.trim()){cst('+c.id+').notes['+i+'].text=ta.value.trim();cst('+c.id+').notes['+i+'].editedAt=new Date().toLocaleString();cst('+c.id+').logEditIdx=-1;save('+c.id+');renderSlide();}">💾 Save</button>'
+          +'<button class="dbtn" style="font-size:12px;padding:4px 10px" onclick="cst('+c.id+').logEditIdx=-1;renderSlide()">Cancel</button>'
+          +'<div class="note-date" style="margin-left:auto">'+n.date+(n.user?' · '+n.user:'')+'</div>'
+          +'</div></div>';
+      } else {
+        nItems+='<div class="note-entry" style="margin-bottom:10px">'
+          +'<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">'
+          +'<div class="note-text">'+n.text.replace(/\n/g,'<br>')+'</div>'
+          +'<div style="display:flex;gap:4px;flex-shrink:0">'
+          +'<button class="sbtn" style="font-size:11px;padding:2px 8px;border-color:var(--border2);color:var(--text2)" onclick="cst('+c.id+').logEditIdx='+i+';renderSlide()">✏️</button>'
+          +'<button class="dbtn" style="font-size:11px;padding:2px 8px" onclick="if(confirm(\'Delete this log entry?\'))cst('+c.id+').notes.splice('+i+',1);save('+c.id+');renderSlide()">✕</button>'
+          +'</div></div>'
+          +'<div class="note-date">'+n.date+(n.user?' &nbsp;·&nbsp; <span style="color:var(--accent2)">'+n.user+'</span>':'')+(n.editedAt?'<span style="color:var(--text3);margin-left:6px">(edited '+n.editedAt+')</span>':'')+'</div>'
+          +'</div>';
+      }
     });
-    body='<div class="ds"><div class="dst"><span class="dot" style="background:var(--accent2)"></span>Notes & updates ('+notes.length+' entries)</div>'
-      +(notes.length===0?'<div class="dt" style="margin-bottom:14px">No notes yet.</div>':'')
+    body='<div class="ds">'
+      +'<div class="dst"><span class="dot" style="background:var(--accent2)"></span>📋 Project Log — '+c.name+' <span style="font-size:12px;color:var(--text3);font-weight:400">('+notes.length+' entries)</span></div>'
+      +(notes.length===0?'<div class="dt" style="margin-bottom:14px">No log entries yet.</div>':'')
       +nItems
-      +'<textarea class="ef" id="noteIn'+c.id+'" placeholder="Add a new note for '+c.name+'..."></textarea>'
-      +'<button class="sbtn" onclick="var el=document.getElementById(\'noteIn'+c.id+'\');if(el&&el.value.trim()){addNote('+c.id+',el.value.trim());renderSlide();}">+ Add note</button>'
+      +'<div style="margin-top:14px">'
+      +'<textarea class="ef" id="noteIn'+c.id+'" placeholder="Add a log entry..." style="min-height:80px"></textarea>'
+      +'<button class="sbtn" style="margin-top:8px" onclick="var el=document.getElementById(\'noteIn'+c.id+'\');if(el&&el.value.trim()){addNote('+c.id+',el.value.trim());el.value=\'\';renderSlide();}">+ Add log entry</button>'
+      +'</div>'
       +'</div>';
 
   }else if(t==='history'){
@@ -1380,7 +1402,7 @@ function openReport(id){
     +'<div class="section"><div class="s-head"><span class="sdot" style="background:#8b5cf6"></span><span class="s-title">Known Israeli Tech / Vendors</span></div><div class="s-body"><p>'+getF(id,'vendors')+'</p></div></div>'
     +'<div class="section"><div class="s-head"><span class="sdot" style="background:#f97316"></span><span class="s-title">Procurement Framework</span></div><div class="s-body"><p>'+getF(id,'procurement')+'</p></div></div>'
     +'<div class="section"><div class="s-head"><span class="sdot" style="background:#f59e0b"></span><span class="s-title">Pipeline & Progress</span></div><div class="s-body"><p style="color:'+(ps==='active'?'#166534':ps==='fallen'?'#991b1b':ps==='pending'?'#92400e':'#334155')+'">'+latestPipe(id)+'</p></div></div>'
-    +(notes.length>0?'<div class="section"><div class="s-head"><span class="sdot" style="background:#06b6d4"></span><span class="s-title">Notes & Updates ('+notes.length+')</span></div><div class="s-body">'+notes.map(function(n){return'<div class="note-e"><p>'+n.text.replace(/\n/g,'<br>')+'</p><div class="note-d">'+n.date+(n.user?' · '+n.user:'')+'</div></div>';}).join('')+'</div></div>':'')
+    +(notes.length>0?'<div class="section"><div class="s-head"><span class="sdot" style="background:#06b6d4"></span><span class="s-title">📋 Project Log ('+notes.length+')</span></div><div class="s-body">'+notes.map(function(n){return'<div class="note-e"><p>'+n.text.replace(/\n/g,'<br>')+'</p><div class="note-d">'+n.date+(n.user?' · '+n.user:'')+'</div></div>';}).join('')+'</div></div>':'')
     +(ctabs.length>0?'<div class="section"><div class="s-head"><span class="sdot" style="background:#8b5cf6"></span><span class="s-title">Additional Sections</span></div><div class="s-body">'+ctabs.map(function(tb){return'<div class="tab-s"><h3>'+tb.name+'</h3>'+(tb.entries||[]).map(function(e){return'<div class="note-e"><p>'+e.text.replace(/\n/g,'<br>')+'</p><div class="note-d">'+e.date+(e.user?' · '+e.user:'')+'</div></div>';}).join('')+'</div>';}).join('')+'</div></div>':'')
     +(allDocs.length>0?'<div class="section"><div class="s-head"><span class="sdot" style="background:#3b82f6"></span><span class="s-title">Attached Documents ('+allDocs.length+')</span></div><div class="s-body">'+allDocs.map(function(d){return'<div class="doc-e"><span style="font-size:22px">📄</span><div class="doc-name">'+d.name+'</div><div class="doc-date">'+d.date+'</div></div>';}).join('')+'</div></div>':'')
     +(function(){var td=TRADE_DB[id]||s.tradeData;if(!td)return '';
@@ -2673,7 +2695,7 @@ function exportPPTX(cid){
 
     // ── NOTES (if any) ─────────────────────────────────────────────────────────
     +(notes.length?'<div class="section" style="background:#f8fafc">'
-    +'<div class="section-title">Notes & Updates</div>'
+    +'<div class="section-title">📋 Project Log</div>'
     +notes.slice(-4).map(function(n){return'<div class="notes-box"><div style="font-size:13px;color:#334155;line-height:1.5">'+tx(n.text,300)+'</div><div style="font-size:11px;color:#94a3b8;margin-top:5px">'+n.date+(n.user?' · '+n.user:'')+'</div></div>';}).join('')
     +'</div>':'')
 

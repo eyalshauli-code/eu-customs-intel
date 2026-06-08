@@ -1456,7 +1456,7 @@ function openReport(id){
         return card;
       }).join('');
       return'<div class="section"><div class="s-head"><span class="sdot" style="background:#8b5cf6"></span><span class="s-title">Capture Plan — Key Contacts ('+cp.length+')</span></div><div class="s-body">'+cards+'</div></div>';
-    })()    })()
+    })()
     +'<div class="footer">EU Customs AI Procurement Intelligence &nbsp;·&nbsp; Confidential &nbsp;·&nbsp; Report generated: '+new Date().toLocaleString()+'</div>'
     +'</div><script>window.print();<\/script></body></html>';
   var w=window.open('','_blank');w.document.write(html);w.document.close();

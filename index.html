@@ -1435,28 +1435,35 @@ function openReport(id){
       var attBg={Supportive:'#f0fdf4',Neutral:'#f8fafc',Unknown:'#fffbeb',Opposing:'#fef2f2'};
       var trkC={'Customer':'#1d4ed8','Money':'#065f46','Customer & Money':'#4c1d95','Influencer':'#92400e','Other':'#374151'};
       var trkB={'Customer':'#eff6ff','Money':'#f0fdf4','Customer & Money':'#faf5ff','Influencer':'#fffbeb','Other':'#f9fafb'};
-      var cards=cp.map(function(p,i){
+      var th=function(t){return'<th style="padding:8px 10px;text-align:left;font-size:11px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:.06em;border-bottom:2px solid #e2e8f0;background:#f8fafc;white-space:nowrap">'+t+'</th>';};
+      var rows=cp.map(function(p,idx){
         var aC=attCol[p.attitude]||'#334155',aB=attBg[p.attitude]||'#f8fafc';
         var tC=trkC[p.track]||'#1d4ed8',tB=trkB[p.track]||'#eff6ff';
         var rC=p.relevance==='Relevant'?'#166534':'#64748b';
-        var card='<div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:18px 20px;margin-bottom:16px;break-inside:avoid">';
-        card+='<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap;border-bottom:1px solid #f1f5f9;padding-bottom:12px">';
-        card+='<div style="font-size:18px;font-weight:700;color:#0f172a">'+(p.name||'—')+'</div>';
-        if(p.track)card+='<span style="background:'+tB+';color:'+tC+';border-radius:4px;padding:3px 10px;font-size:12px;font-weight:700">'+p.track+'</span>';
-        if(p.attitude)card+='<span style="background:'+aB+';color:'+aC+';border-radius:4px;padding:3px 10px;font-size:12px;font-weight:700">'+p.attitude+'</span>';
-        if(p.relevance)card+='<span style="margin-left:auto;color:'+rC+';font-size:12px;font-weight:700">'+p.relevance+'</span>';
-        card+='</div>';
-        card+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px 32px;margin-bottom:12px">';
-        var pairs=[['Title',p.title],['Phone',p.phone?'<a href="tel:'+p.phone+'" style="color:#3b82f6">'+p.phone+'</a>':null],['Seniority',p.seniority],['Role',p.role],['Type',p.type],['In Office Until',p.inOfficeUntil]];
-        pairs.forEach(function(f){if(f[1]){card+='<div><div style="font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em">'+f[0]+'</div><div style="font-size:14px;color:#1e293b;margin-top:2px">'+f[1]+'</div></div>';}});
-        card+='</div>';
-        var wide=[['Agenda / Personal Interest',p.agenda],['Last Interaction',p.lastInteraction],['Next Step',p.nextStep],['Comments',p.comments]];
-        wide.forEach(function(f){if(f[1]){card+='<div style="margin-top:8px;padding:10px 14px;background:#f8fafc;border-radius:6px;border-left:3px solid #cbd5e1"><div style="font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">'+f[0]+'</div><div style="font-size:14px;color:#334155;line-height:1.6;white-space:pre-wrap">'+f[1]+'</div></div>';}});
-        card+='</div>';
-        return card;
+        var bg=idx%2===0?'#ffffff':'#f8fafc';
+        return '<tr style="background:'+bg+';vertical-align:top">'
+          +'<td style="padding:9px 10px;font-weight:700;color:#0f172a;border-bottom:1px solid #f1f5f9;white-space:nowrap">'+(p.name||'—')+'</td>'
+          +'<td style="padding:9px 10px;border-bottom:1px solid #f1f5f9"><span style="background:'+tB+';color:'+tC+';border-radius:4px;padding:2px 7px;font-size:11px;font-weight:700">'+(p.track||'—')+'</span></td>'
+          +'<td style="padding:9px 10px;color:#334155;font-size:13px;border-bottom:1px solid #f1f5f9">'+(p.title||'—')+'</td>'
+          +'<td style="padding:9px 10px;font-size:13px;border-bottom:1px solid #f1f5f9">'+(p.phone?'<a href="tel:'+p.phone+'" style="color:#3b82f6">'+p.phone+'</a>':'—')+'</td>'
+          +'<td style="padding:9px 10px;color:#64748b;font-size:13px;border-bottom:1px solid #f1f5f9;white-space:nowrap">'+(p.seniority||'—')+'</td>'
+          +'<td style="padding:9px 10px;color:#334155;font-size:13px;border-bottom:1px solid #f1f5f9">'+(p.role||'—')+'</td>'
+          +'<td style="padding:9px 10px;border-bottom:1px solid #f1f5f9"><span style="background:'+aB+';color:'+aC+';border-radius:4px;padding:2px 7px;font-size:11px;font-weight:700">'+(p.attitude||'—')+'</span></td>'
+          +'<td style="padding:9px 10px;border-bottom:1px solid #f1f5f9;color:'+rC+';font-weight:'+(p.relevance==='Relevant'?'700':'400')+';font-size:13px;white-space:nowrap">'+(p.relevance||'—')+'</td>'
+          +'<td style="padding:9px 10px;color:#64748b;font-size:13px;border-bottom:1px solid #f1f5f9;white-space:nowrap">'+(p.inOfficeUntil||'—')+'</td>'
+          +'<td style="padding:9px 10px;color:#334155;font-size:13px;border-bottom:1px solid #f1f5f9;min-width:130px;white-space:pre-wrap">'+(p.lastInteraction||'—')+'</td>'
+          +'<td style="padding:9px 10px;color:#334155;font-size:13px;border-bottom:1px solid #f1f5f9;min-width:160px;white-space:pre-wrap">'+(p.nextStep||'—')+'</td>'
+          +'<td style="padding:9px 10px;color:#64748b;font-size:13px;border-bottom:1px solid #f1f5f9;min-width:160px;white-space:pre-wrap">'+(p.comments||'—')+'</td>'
+          +'<td style="padding:9px 10px;color:#334155;font-size:13px;border-bottom:1px solid #f1f5f9;min-width:160px;white-space:pre-wrap">'+(p.agenda||'—')+'</td>'
+          +'</tr>';
       }).join('');
-      return'<div class="section"><div class="s-head"><span class="sdot" style="background:#8b5cf6"></span><span class="s-title">Capture Plan — Key Contacts ('+cp.length+')</span></div><div class="s-body">'+cards+'</div></div>';
-    })()
+      return '<div class="section"><div class="s-head"><span class="sdot" style="background:#8b5cf6"></span><span class="s-title">Capture Plan — Key Contacts ('+cp.length+')</span></div>'
+        +'<div class="s-body" style="padding:0;overflow-x:auto">'
+        +'<table style="width:100%;border-collapse:collapse;font-size:14px">'
+        +'<thead><tr>'+[th('Name'),th('Track'),th('Title'),th('Phone'),th('Seniority'),th('Role'),th('Attitude'),th('Relevance'),th('In Office Until'),th('Last Interaction'),th('Next Step'),th('Comments'),th('Agenda')].join('')+'</tr></thead>'
+        +'<tbody>'+rows+'</tbody>'
+        +'</table></div></div>';
+    })()    })()
     +'<div class="footer">EU Customs AI Procurement Intelligence &nbsp;·&nbsp; Confidential &nbsp;·&nbsp; Report generated: '+new Date().toLocaleString()+'</div>'
     +'</div><script>window.print();<\/script></body></html>';
   var w=window.open('','_blank');w.document.write(html);w.document.close();

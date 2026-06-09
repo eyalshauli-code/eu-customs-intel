@@ -1435,35 +1435,53 @@ function openReport(id){
       var attBg={Supportive:'#f0fdf4',Neutral:'#f8fafc',Unknown:'#fffbeb',Opposing:'#fef2f2'};
       var trkC={'Customer':'#1d4ed8','Money':'#065f46','Customer & Money':'#4c1d95','Influencer':'#92400e','Other':'#374151'};
       var trkB={'Customer':'#eff6ff','Money':'#f0fdf4','Customer & Money':'#faf5ff','Influencer':'#fffbeb','Other':'#f9fafb'};
-      var th=function(t){return'<th style="padding:8px 10px;text-align:left;font-size:11px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:.06em;border-bottom:2px solid #e2e8f0;background:#f8fafc;white-space:nowrap">'+t+'</th>';};
+      var colDefs=[
+        {key:'name',label:'Name'},
+        {key:'track',label:'Track'},
+        {key:'title',label:'Title'},
+        {key:'seniority',label:'Seniority'},
+        {key:'role',label:'Role'},
+        {key:'attitude',label:'Attitude'},
+        {key:'relevance',label:'Relevance'},
+        {key:'inOfficeUntil',label:'In Office Until'},
+        {key:'phone',label:'Phone'},
+        {key:'lastInteraction',label:'Last Interaction'},
+        {key:'nextStep',label:'Next Step'},
+        {key:'comments',label:'Comments'},
+        {key:'agenda',label:'Agenda'}
+      ];
+      var activeCols=colDefs.filter(function(col){
+        return cp.some(function(p){return p[col.key]&&p[col.key].toString().trim()!=='';});
+      });
+      var th=function(t){return'<th style="padding:7px 10px;text-align:left;font-size:11px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:.06em;border-bottom:2px solid #e2e8f0;background:#f8fafc;white-space:nowrap">'+t+'</th>';};
       var rows=cp.map(function(p,idx){
-        var aC=attCol[p.attitude]||'#334155',aB=attBg[p.attitude]||'#f8fafc';
-        var tC=trkC[p.track]||'#1d4ed8',tB=trkB[p.track]||'#eff6ff';
-        var rC=p.relevance==='Relevant'?'#166534':'#64748b';
         var bg=idx%2===0?'#ffffff':'#f8fafc';
-        return '<tr style="background:'+bg+';vertical-align:top">'
-          +'<td style="padding:9px 10px;font-weight:700;color:#0f172a;border-bottom:1px solid #f1f5f9;white-space:nowrap">'+(p.name||'—')+'</td>'
-          +'<td style="padding:9px 10px;border-bottom:1px solid #f1f5f9"><span style="background:'+tB+';color:'+tC+';border-radius:4px;padding:2px 7px;font-size:11px;font-weight:700">'+(p.track||'—')+'</span></td>'
-          +'<td style="padding:9px 10px;color:#334155;font-size:13px;border-bottom:1px solid #f1f5f9">'+(p.title||'—')+'</td>'
-          +'<td style="padding:9px 10px;font-size:13px;border-bottom:1px solid #f1f5f9">'+(p.phone?'<a href="tel:'+p.phone+'" style="color:#3b82f6">'+p.phone+'</a>':'—')+'</td>'
-          +'<td style="padding:9px 10px;color:#64748b;font-size:13px;border-bottom:1px solid #f1f5f9;white-space:nowrap">'+(p.seniority||'—')+'</td>'
-          +'<td style="padding:9px 10px;color:#334155;font-size:13px;border-bottom:1px solid #f1f5f9">'+(p.role||'—')+'</td>'
-          +'<td style="padding:9px 10px;border-bottom:1px solid #f1f5f9"><span style="background:'+aB+';color:'+aC+';border-radius:4px;padding:2px 7px;font-size:11px;font-weight:700">'+(p.attitude||'—')+'</span></td>'
-          +'<td style="padding:9px 10px;border-bottom:1px solid #f1f5f9;color:'+rC+';font-weight:'+(p.relevance==='Relevant'?'700':'400')+';font-size:13px;white-space:nowrap">'+(p.relevance||'—')+'</td>'
-          +'<td style="padding:9px 10px;color:#64748b;font-size:13px;border-bottom:1px solid #f1f5f9;white-space:nowrap">'+(p.inOfficeUntil||'—')+'</td>'
-          +'<td style="padding:9px 10px;color:#334155;font-size:13px;border-bottom:1px solid #f1f5f9;min-width:130px;white-space:pre-wrap">'+(p.lastInteraction||'—')+'</td>'
-          +'<td style="padding:9px 10px;color:#334155;font-size:13px;border-bottom:1px solid #f1f5f9;min-width:160px;white-space:pre-wrap">'+(p.nextStep||'—')+'</td>'
-          +'<td style="padding:9px 10px;color:#64748b;font-size:13px;border-bottom:1px solid #f1f5f9;min-width:160px;white-space:pre-wrap">'+(p.comments||'—')+'</td>'
-          +'<td style="padding:9px 10px;color:#334155;font-size:13px;border-bottom:1px solid #f1f5f9;min-width:160px;white-space:pre-wrap">'+(p.agenda||'—')+'</td>'
-          +'</tr>';
+        var cells=activeCols.map(function(col){
+          var val=p[col.key]||'—';
+          if(col.key==='track'){
+            var tC=trkC[p.track]||'#1d4ed8',tB=trkB[p.track]||'#eff6ff';
+            return'<td style="padding:8px 10px;border-bottom:1px solid #f1f5f9;vertical-align:top"><span style="background:'+tB+';color:'+tC+';border-radius:4px;padding:2px 7px;font-size:11px;font-weight:700">'+val+'</span></td>';
+          }
+          if(col.key==='attitude'){
+            var aC=attCol[p.attitude]||'#334155',aB=attBg[p.attitude]||'#f8fafc';
+            return'<td style="padding:8px 10px;border-bottom:1px solid #f1f5f9;vertical-align:top"><span style="background:'+aB+';color:'+aC+';border-radius:4px;padding:2px 7px;font-size:11px;font-weight:700">'+val+'</span></td>';
+          }
+          var style='padding:8px 10px;border-bottom:1px solid #f1f5f9;vertical-align:top;font-size:13px;';
+          if(col.key==='name')style+='font-weight:700;color:#0f172a;white-space:nowrap';
+          else if(col.key==='relevance')style+='color:'+(p.relevance==='Relevant'?'#166534':'#64748b')+';font-weight:'+(p.relevance==='Relevant'?'700':'400');
+          else if(col.key==='nextStep'||col.key==='comments'||col.key==='agenda'||col.key==='lastInteraction')style+='color:#334155;white-space:pre-wrap;min-width:150px';
+          else style+='color:#334155;white-space:nowrap';
+          return'<td style="'+style+'">'+val+'</td>';
+        }).join('');
+        return'<tr style="background:'+bg+'">'+cells+'</tr>';
       }).join('');
-      return '<div class="section"><div class="s-head"><span class="sdot" style="background:#8b5cf6"></span><span class="s-title">Capture Plan — Key Contacts ('+cp.length+')</span></div>'
-        +'<div class="s-body" style="padding:0;overflow-x:auto">'
-        +'<table style="width:100%;border-collapse:collapse;font-size:14px">'
-        +'<thead><tr>'+[th('Name'),th('Track'),th('Title'),th('Phone'),th('Seniority'),th('Role'),th('Attitude'),th('Relevance'),th('In Office Until'),th('Last Interaction'),th('Next Step'),th('Comments'),th('Agenda')].join('')+'</tr></thead>'
+      return'<div class="section"><div class="s-head"><span class="sdot" style="background:#8b5cf6"></span><span class="s-title">Capture Plan — Key Contacts ('+cp.length+')</span></div>'
+        +'<div class="s-body" style="padding:0">'
+        +'<table style="width:100%;border-collapse:collapse;font-size:13px">'
+        +'<thead><tr>'+activeCols.map(function(c){return th(c.label);}).join('')+'</tr></thead>'
         +'<tbody>'+rows+'</tbody>'
         +'</table></div></div>';
-    })()
+    })()    })()
     +'<div class="footer">EU Customs AI Procurement Intelligence &nbsp;·&nbsp; Confidential &nbsp;·&nbsp; Report generated: '+new Date().toLocaleString()+'</div>'
     +'</div><script>window.print();<\/script></body></html>';
   var w=window.open('','_blank');w.document.write(html);w.document.close();

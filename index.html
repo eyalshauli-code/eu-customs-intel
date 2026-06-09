@@ -1432,42 +1432,38 @@ function openReport(id){
     +(function(){
       var cp=s.capturePlan||[];if(!cp.length)return'';
       var attCol={Supportive:'#166534',Neutral:'#334155',Unknown:'#92400e',Opposing:'#7f1d1d'};
-      var attBg={Supportive:'#f0fdf4',Neutral:'#f8fafc',Unknown:'#fffbeb',Opposing:'#fef2f2'};
+      var attBg={Supportive:'#dcfce7',Neutral:'#f8fafc',Unknown:'#fef3c7',Opposing:'#fee2e2'};
       var trkC={'Customer':'#1d4ed8','Money':'#065f46','Customer & Money':'#4c1d95','Influencer':'#92400e','Other':'#374151'};
-      var trkB={'Customer':'#eff6ff','Money':'#f0fdf4','Customer & Money':'#faf5ff','Influencer':'#fffbeb','Other':'#f9fafb'};
-      var entries=cp.map(function(p,i){
+      var trkB={'Customer':'#dbeafe','Money':'#d1fae5','Customer & Money':'#ede9fe','Influencer':'#fef3c7','Other':'#f3f4f6'};
+      var hd=function(t){return'<th style="padding:8px 10px;font-size:11px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:.05em;border:1px solid #cbd5e1;background:#f1f5f9;white-space:nowrap;text-align:left">'+t+'</th>';};
+      var td=function(v,extra){return'<td style="padding:8px 10px;font-size:13px;color:#1e293b;border:1px solid #e2e8f0;vertical-align:top;'+(extra||'')+'">'+v+'</td>';};
+      var rows=cp.map(function(p){
         var aC=attCol[p.attitude]||'#334155',aB=attBg[p.attitude]||'#f8fafc';
-        var tC=trkC[p.track]||'#1d4ed8',tB=trkB[p.track]||'#eff6ff';
+        var tC=trkC[p.track]||'#1d4ed8',tB=trkB[p.track]||'#dbeafe';
         var rC=p.relevance==='Relevant'?'#166534':'#64748b';
-        var row='<div style="margin-bottom:18px;padding:14px 16px;border:1px solid #e2e8f0;border-radius:8px;break-inside:avoid;page-break-inside:avoid">';
-        row+='<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid #f1f5f9">';
-        row+='<span style="font-size:16px;font-weight:700;color:#0f172a">'+(p.name||'')+'</span>';
-        if(p.track)row+='<span style="background:'+tB+';color:'+tC+';border-radius:4px;padding:2px 8px;font-size:12px;font-weight:700">'+p.track+'</span>';
-        if(p.attitude)row+='<span style="background:'+aB+';color:'+aC+';border-radius:4px;padding:2px 8px;font-size:12px;font-weight:700">'+p.attitude+'</span>';
-        if(p.relevance)row+='<span style="margin-left:auto;color:'+rC+';font-size:12px;font-weight:700">'+p.relevance+'</span>';
-        row+='</div>';
-        var lbl=function(k,v){
-          if(!v||v.toString().trim()==='')return'';
-          return'<div style="display:flex;gap:0;margin-bottom:5px;font-size:13px">'
-            +'<span style="min-width:140px;color:#94a3b8;font-weight:600;flex-shrink:0">'+k+'</span>'
-            +'<span style="color:#1e293b;white-space:pre-wrap;flex:1">'+v+'</span>'
-            +'</div>';
-        };
-        row+=lbl('Title',p.title);
-        row+=lbl('Phone',p.phone);
-        row+=lbl('Seniority',p.seniority);
-        row+=lbl('Role',p.role);
-        row+=lbl('Type',p.type);
-        row+=lbl('In Office Until',p.inOfficeUntil);
-        row+=lbl('Last Interaction',p.lastInteraction);
-        row+=lbl('Next Step',p.nextStep);
-        row+=lbl('Comments',p.comments);
-        row+=lbl('Agenda',p.agenda);
-        row+='</div>';
-        return row;
+        return '<tr>'
+          +td('<strong>'+(p.name||'—')+'</strong>')
+          +td(p.track?'<span style="background:'+tB+';color:'+tC+';border-radius:4px;padding:2px 8px;font-size:11px;font-weight:700">'+p.track+'</span>':'—')
+          +td(p.title||'—')
+          +td(p.phone||'—')
+          +td(p.seniority||'—')
+          +td(p.role||'—')
+          +td(p.type||'—')
+          +td(p.attitude?'<span style="background:'+aB+';color:'+aC+';border-radius:4px;padding:2px 8px;font-size:11px;font-weight:700">'+p.attitude+'</span>':'—')
+          +td(p.relevance?'<span style="color:'+rC+';font-weight:700">'+p.relevance+'</span>':'—')
+          +td(p.inOfficeUntil||'—')
+          +td(p.lastInteraction||'—','white-space:pre-wrap;min-width:120px')
+          +td(p.nextStep||'—','white-space:pre-wrap;min-width:180px')
+          +td(p.comments||'—','white-space:pre-wrap;min-width:180px')
+          +td(p.agenda||'—','white-space:pre-wrap;min-width:180px')
+          +'</tr>';
       }).join('');
-      return'<div class="section"><div class="s-head"><span class="sdot" style="background:#8b5cf6"></span><span class="s-title">Capture Plan — Key Contacts ('+cp.length+')</span></div>'
-        +'<div class="s-body">'+entries+'</div></div>';
+      return '<div class="section"><div class="s-head"><span class="sdot" style="background:#8b5cf6"></span><span class="s-title">Capture Plan — Key Contacts ('+cp.length+')</span></div>'
+        +'<div class="s-body" style="padding:0;overflow-x:auto">'
+        +'<table style="width:100%;border-collapse:collapse;font-size:13px">'
+        +'<thead><tr>'+hd('Name')+hd('Track')+hd('Title')+hd('Phone')+hd('Seniority')+hd('Role')+hd('Type')+hd('Attitude')+hd('Relevance')+hd('In Office Until')+hd('Last Interaction')+hd('Next Step')+hd('Comments')+hd('Agenda')+'</tr></thead>'
+        +'<tbody>'+rows+'</tbody>'
+        +'</table></div></div>';
     })()
     +'<div class="footer">EU Customs AI Procurement Intelligence &nbsp;·&nbsp; Confidential &nbsp;·&nbsp; Report generated: '+new Date().toLocaleString()+'</div>'
     +'</div><script>window.print();<\/script></body></html>';

@@ -1463,7 +1463,7 @@ function openReport(id){
         +'<thead><tr>'+[th('Name'),th('Track'),th('Title'),th('Phone'),th('Seniority'),th('Role'),th('Attitude'),th('Relevance'),th('In Office Until'),th('Last Interaction'),th('Next Step'),th('Comments'),th('Agenda')].join('')+'</tr></thead>'
         +'<tbody>'+rows+'</tbody>'
         +'</table></div></div>';
-    })()    })()
+    })()
     +'<div class="footer">EU Customs AI Procurement Intelligence &nbsp;·&nbsp; Confidential &nbsp;·&nbsp; Report generated: '+new Date().toLocaleString()+'</div>'
     +'</div><script>window.print();<\/script></body></html>';
   var w=window.open('','_blank');w.document.write(html);w.document.close();

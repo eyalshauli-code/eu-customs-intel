@@ -1481,7 +1481,7 @@ function openReport(id){
         +'<thead><tr>'+activeCols.map(function(c){return th(c.label);}).join('')+'</tr></thead>'
         +'<tbody>'+rows+'</tbody>'
         +'</table></div></div>';
-    })()    })()
+    })()
     +'<div class="footer">EU Customs AI Procurement Intelligence &nbsp;·&nbsp; Confidential &nbsp;·&nbsp; Report generated: '+new Date().toLocaleString()+'</div>'
     +'</div><script>window.print();<\/script></body></html>';
   var w=window.open('','_blank');w.document.write(html);w.document.close();

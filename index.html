@@ -1435,53 +1435,40 @@ function openReport(id){
       var attBg={Supportive:'#f0fdf4',Neutral:'#f8fafc',Unknown:'#fffbeb',Opposing:'#fef2f2'};
       var trkC={'Customer':'#1d4ed8','Money':'#065f46','Customer & Money':'#4c1d95','Influencer':'#92400e','Other':'#374151'};
       var trkB={'Customer':'#eff6ff','Money':'#f0fdf4','Customer & Money':'#faf5ff','Influencer':'#fffbeb','Other':'#f9fafb'};
-      var colDefs=[
-        {key:'name',label:'Name'},
-        {key:'track',label:'Track'},
-        {key:'title',label:'Title'},
-        {key:'seniority',label:'Seniority'},
-        {key:'role',label:'Role'},
-        {key:'attitude',label:'Attitude'},
-        {key:'relevance',label:'Relevance'},
-        {key:'inOfficeUntil',label:'In Office Until'},
-        {key:'phone',label:'Phone'},
-        {key:'lastInteraction',label:'Last Interaction'},
-        {key:'nextStep',label:'Next Step'},
-        {key:'comments',label:'Comments'},
-        {key:'agenda',label:'Agenda'}
-      ];
-      var activeCols=colDefs.filter(function(col){
-        return cp.some(function(p){return p[col.key]&&p[col.key].toString().trim()!=='';});
-      });
-      var th=function(t){return'<th style="padding:7px 10px;text-align:left;font-size:11px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:.06em;border-bottom:2px solid #e2e8f0;background:#f8fafc;white-space:nowrap">'+t+'</th>';};
-      var rows=cp.map(function(p,idx){
-        var bg=idx%2===0?'#ffffff':'#f8fafc';
-        var cells=activeCols.map(function(col){
-          var val=p[col.key]||'—';
-          if(col.key==='track'){
-            var tC=trkC[p.track]||'#1d4ed8',tB=trkB[p.track]||'#eff6ff';
-            return'<td style="padding:8px 10px;border-bottom:1px solid #f1f5f9;vertical-align:top"><span style="background:'+tB+';color:'+tC+';border-radius:4px;padding:2px 7px;font-size:11px;font-weight:700">'+val+'</span></td>';
-          }
-          if(col.key==='attitude'){
-            var aC=attCol[p.attitude]||'#334155',aB=attBg[p.attitude]||'#f8fafc';
-            return'<td style="padding:8px 10px;border-bottom:1px solid #f1f5f9;vertical-align:top"><span style="background:'+aB+';color:'+aC+';border-radius:4px;padding:2px 7px;font-size:11px;font-weight:700">'+val+'</span></td>';
-          }
-          var style='padding:8px 10px;border-bottom:1px solid #f1f5f9;vertical-align:top;font-size:13px;';
-          if(col.key==='name')style+='font-weight:700;color:#0f172a;white-space:nowrap';
-          else if(col.key==='relevance')style+='color:'+(p.relevance==='Relevant'?'#166534':'#64748b')+';font-weight:'+(p.relevance==='Relevant'?'700':'400');
-          else if(col.key==='nextStep'||col.key==='comments'||col.key==='agenda'||col.key==='lastInteraction')style+='color:#334155;white-space:pre-wrap;min-width:150px';
-          else style+='color:#334155;white-space:nowrap';
-          return'<td style="'+style+'">'+val+'</td>';
-        }).join('');
-        return'<tr style="background:'+bg+'">'+cells+'</tr>';
+      var entries=cp.map(function(p,i){
+        var aC=attCol[p.attitude]||'#334155',aB=attBg[p.attitude]||'#f8fafc';
+        var tC=trkC[p.track]||'#1d4ed8',tB=trkB[p.track]||'#eff6ff';
+        var rC=p.relevance==='Relevant'?'#166534':'#64748b';
+        var row='<div style="margin-bottom:18px;padding:14px 16px;border:1px solid #e2e8f0;border-radius:8px;break-inside:avoid;page-break-inside:avoid">';
+        row+='<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid #f1f5f9">';
+        row+='<span style="font-size:16px;font-weight:700;color:#0f172a">'+(p.name||'')+'</span>';
+        if(p.track)row+='<span style="background:'+tB+';color:'+tC+';border-radius:4px;padding:2px 8px;font-size:12px;font-weight:700">'+p.track+'</span>';
+        if(p.attitude)row+='<span style="background:'+aB+';color:'+aC+';border-radius:4px;padding:2px 8px;font-size:12px;font-weight:700">'+p.attitude+'</span>';
+        if(p.relevance)row+='<span style="margin-left:auto;color:'+rC+';font-size:12px;font-weight:700">'+p.relevance+'</span>';
+        row+='</div>';
+        var lbl=function(k,v){
+          if(!v||v.toString().trim()==='')return'';
+          return'<div style="display:flex;gap:0;margin-bottom:5px;font-size:13px">'
+            +'<span style="min-width:140px;color:#94a3b8;font-weight:600;flex-shrink:0">'+k+'</span>'
+            +'<span style="color:#1e293b;white-space:pre-wrap;flex:1">'+v+'</span>'
+            +'</div>';
+        };
+        row+=lbl('Title',p.title);
+        row+=lbl('Phone',p.phone);
+        row+=lbl('Seniority',p.seniority);
+        row+=lbl('Role',p.role);
+        row+=lbl('Type',p.type);
+        row+=lbl('In Office Until',p.inOfficeUntil);
+        row+=lbl('Last Interaction',p.lastInteraction);
+        row+=lbl('Next Step',p.nextStep);
+        row+=lbl('Comments',p.comments);
+        row+=lbl('Agenda',p.agenda);
+        row+='</div>';
+        return row;
       }).join('');
       return'<div class="section"><div class="s-head"><span class="sdot" style="background:#8b5cf6"></span><span class="s-title">Capture Plan — Key Contacts ('+cp.length+')</span></div>'
-        +'<div class="s-body" style="padding:0">'
-        +'<table style="width:100%;border-collapse:collapse;font-size:13px">'
-        +'<thead><tr>'+activeCols.map(function(c){return th(c.label);}).join('')+'</tr></thead>'
-        +'<tbody>'+rows+'</tbody>'
-        +'</table></div></div>';
-    })()
+        +'<div class="s-body">'+entries+'</div></div>';
+    })()    })()
     +'<div class="footer">EU Customs AI Procurement Intelligence &nbsp;·&nbsp; Confidential &nbsp;·&nbsp; Report generated: '+new Date().toLocaleString()+'</div>'
     +'</div><script>window.print();<\/script></body></html>';
   var w=window.open('','_blank');w.document.write(html);w.document.close();
